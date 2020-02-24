@@ -1,5 +1,6 @@
 import logging
 import base64
+import gzip
 
 from platform import python_version
 
@@ -195,3 +196,12 @@ class Connection(object):
             s = "{0}:{1}".format(api_key[0], api_key[1]).encode('utf-8')
             return "ApiKey " + base64.b64encode(s).decode('utf-8')
         return "ApiKey " + api_key
+
+
+def gzip_compress(body):
+    """Applies GZIP compression to an HTTP body"""
+    try:
+        return gzip.compress(body)
+    except AttributeError:
+        # oops, Python2.7 doesn't have `gzip.compress` let's try again
+        return gzip.zlib.compress(body)

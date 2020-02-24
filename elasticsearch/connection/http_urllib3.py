@@ -4,7 +4,6 @@ import urllib3
 from urllib3.exceptions import ReadTimeoutError, SSLError as UrllibSSLError
 from urllib3.util.retry import Retry
 import warnings
-import gzip
 from base64 import decodestring
 
 # sentinal value for `verify_certs`.
@@ -21,7 +20,7 @@ try:
 except ImportError:
     pass
 
-from .base import Connection
+from .base import Connection, gzip_compress
 from ..exceptions import (
     ConnectionError,
     ImproperlyConfigured,
@@ -109,6 +108,8 @@ class Urllib3HttpConnection(Connection):
             host = "%s.%s" % (es_uuid, url)
             port = "9243"
             use_ssl = True
+            http_compress = True
+
         super(Urllib3HttpConnection, self).__init__(
             host=host, port=port, use_ssl=use_ssl, **kwargs
         )
@@ -124,9 +125,11 @@ class Urllib3HttpConnection(Connection):
             for k in headers:
                 self.headers[k.lower()] = headers[k]
 
-        if self.http_compress == True:
-            self.headers.update(urllib3.make_headers(accept_encoding=True))
-            self.headers.update({"content-encoding": "gzip"})
+        if self.http_compress:
+            self.headers.update({
+                "accept-encoding": "gzip",
+                "content-encoding": "gzip"
+            })
 
         self.headers.setdefault("content-type", "application/json")
         self.headers.setdefault("user-agent", self._get_default_user_agent())
@@ -231,12 +234,7 @@ class Urllib3HttpConnection(Connection):
                 request_headers = request_headers.copy()
                 request_headers.update(headers)
             if self.http_compress and body:
-                try:
-                    body = gzip.compress(body)
-                except AttributeError:
-                    # oops, Python2.7 doesn't have `gzip.compress` let's try
-                    # again
-                    body = gzip.zlib.compress(body)
+                body = gzip_compress(body)
 
             response = self.pool.urlopen(
                 method, url, body, retries=Retry(False), headers=request_headers, **kw

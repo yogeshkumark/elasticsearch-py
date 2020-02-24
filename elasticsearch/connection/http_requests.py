@@ -9,7 +9,7 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
-from .base import Connection
+from .base import Connection, gzip_compress
 from ..exceptions import (
     ConnectionError,
     ImproperlyConfigured,
@@ -35,6 +35,7 @@ class RequestsHttpConnection(Connection):
     :arg client_key: path to the file containing the private key if using
         separate cert and key files (client_cert will contain only the cert)
     :arg headers: any custom http headers to be add to requests
+    :arg http_compress: Use gzip compression
     :arg cloud_id: The Cloud ID from ElasticCloud. Convient way to connect to cloud instances.
     :arg api_key: optional API Key authentication as either base64 encoded string or a tuple.
         Other host connection params will be ignored.
@@ -52,6 +53,7 @@ class RequestsHttpConnection(Connection):
         client_cert=None,
         client_key=None,
         headers=None,
+        http_compress=False,
         cloud_id=None,
         api_key=None,
         **kwargs
@@ -68,6 +70,7 @@ class RequestsHttpConnection(Connection):
             host = "%s.%s" % (es_uuid, url)
             port = 9243
             use_ssl = True
+            http_compress = True
 
         super(RequestsHttpConnection, self).__init__(
             host=host, port=port, use_ssl=use_ssl, **kwargs
@@ -76,14 +79,24 @@ class RequestsHttpConnection(Connection):
         self.session.headers = headers or {}
         self.session.headers.setdefault("content-type", "application/json")
         self.session.headers.setdefault("user-agent", self._get_default_user_agent())
+
+        self.http_compress = http_compress
+        if self.http_compress:
+            self.headers.update({
+                "accept-encoding": "gzip",
+                "content-encoding": "gzip"
+            })
+
         if http_auth is not None:
             if isinstance(http_auth, (tuple, list)):
                 http_auth = tuple(http_auth)
             elif isinstance(http_auth, string_types):
                 http_auth = tuple(http_auth.split(":", 1))
             self.session.auth = http_auth
+
         if api_key is not None:
             self.session.headers['authorization'] = self._get_api_key_header_val(api_key)
+
         self.base_url = "http%s://%s:%d%s" % (
             "s" if self.use_ssl else "",
             host,
@@ -120,6 +133,10 @@ class RequestsHttpConnection(Connection):
             url = "%s?%s" % (url, urlencode(params or {}))
 
         start = time.time()
+
+        if self.http_compress and body:
+            body = gzip_compress(body)
+
         request = requests.Request(method=method, headers=headers, url=url, data=body)
         prepared_request = self.session.prepare_request(request)
         settings = self.session.merge_environment_settings(
@@ -179,3 +196,7 @@ class RequestsHttpConnection(Connection):
         Explicitly closes connections
         """
         self.session.close()
+
+    @property
+    def headers(self):
+        return self.session.headers

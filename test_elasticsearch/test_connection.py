@@ -43,6 +43,9 @@ class TestUrllib3Connection(TestCase):
         self.assertEquals(
             con.host, "https://0fd50f62320ed6539f6cb48e1b68.example.cloud.com:9243"
         )
+        self.assertTrue(con.http_compress)
+        self.assertTrue(con.headers["accept-encoding"], "gzip")
+        self.assertTrue(con.headers["content-encoding"], "gzip")
 
     def test_api_key_auth(self):
         # test with tuple
@@ -62,6 +65,7 @@ class TestUrllib3Connection(TestCase):
     def test_http_compression(self):
         con = Urllib3HttpConnection(http_compress=True)
         self.assertTrue(con.http_compress)
+        self.assertEquals(con.headers["accept-encoding"], "gzip")
         self.assertEquals(con.headers["content-encoding"], "gzip")
 
     def test_default_user_agent(self):
@@ -196,6 +200,11 @@ class TestRequestsConnection(TestCase):
             con.host, "https://0fd50f62320ed6539f6cb48e1b68.example.cloud.com:9243"
         )
 
+        # Setting cloud_id should also enable HTTP compression
+        self.assertTrue(con.http_compress)
+        self.assertEqual(con.headers["accept-encoding"], "gzip")
+        self.assertEqual(con.headers["content-encoding"], "gzip")
+
     def test_api_key_auth(self):
         # test with tuple
         con = RequestsHttpConnection(
@@ -210,6 +219,12 @@ class TestRequestsConnection(TestCase):
             api_key="ZWxhc3RpYzpjaGFuZ2VtZTI=",
         )
         self.assertEquals(con.session.headers["authorization"], "ApiKey ZWxhc3RpYzpjaGFuZ2VtZTI=")
+
+    def test_http_compression(self):
+        con = RequestsHttpConnection(http_compress=True)
+        self.assertTrue(con.http_compress)
+        self.assertEquals(con.headers["accept-encoding"], "gzip")
+        self.assertEquals(con.headers["content-encoding"], "gzip")
 
     def test_uses_https_if_verify_certs_is_off(self):
         with warnings.catch_warnings(record=True) as w:

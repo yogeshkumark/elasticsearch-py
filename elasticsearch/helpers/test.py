@@ -1,11 +1,6 @@
 import time
 import os
-
-try:
-    # python 2.6
-    from unittest2 import TestCase, SkipTest
-except ImportError:
-    from unittest import TestCase, SkipTest
+from unittest import TestCase, SkipTest
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError
@@ -13,14 +8,14 @@ from elasticsearch.exceptions import ConnectionError
 
 def get_test_client(nowait=False, **kwargs):
     # construct kwargs from the environment
-    kw = {"timeout": 30}
-    if "TEST_ES_CONNECTION" in os.environ:
-        from elasticsearch import connection
+    kw = {"timeout": 30, "ca_certs": ".ci/certs/ca.pem"}
 
-        kw["connection_class"] = getattr(connection, os.environ["TEST_ES_CONNECTION"])
+    if "PYTHON_CONNECTION_CLASS" in os.environ:
+        from elasticsearch import connection
+        kw["connection_class"] = getattr(connection, os.environ["PYTHON_CONNECTION_CLASS"])
 
     kw.update(kwargs)
-    client = Elasticsearch([os.environ.get("TEST_ES_SERVER", {})], **kw)
+    client = Elasticsearch([os.environ.get("ELASTICSEARCH_HOST", {})], **kw)
 
     # wait for yellow status
     for _ in range(1 if nowait else 100):
@@ -55,6 +50,7 @@ class ElasticsearchTestCase(TestCase):
         super(ElasticsearchTestCase, self).tearDown()
         self.client.indices.delete(index="*", ignore=404)
         self.client.indices.delete_template(name="*", ignore=404)
+        self.client.indices.delete_alias(index="_all", name="_all", ignore=404)
 
     @property
     def es_version(self):

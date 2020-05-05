@@ -1,10 +1,16 @@
+# Licensed to Elasticsearch B.V under one or more agreements.
+# Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
+# See the LICENSE file in the project root for more information
+
 import sys
 from pathlib import Path
+import platform
+
 sys.path.append(str(Path(__file__).absolute().parent.parent))
 
 import logging
 import os
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, __versionstr__
 from benchmarking.lib import benchmarks, Runner, RunnerConfig, Service
 
 
@@ -46,15 +52,23 @@ def main():
         build_id=config["BUILD_ID"],
         category=os.getenv("CLIENT_BENCHMARK_CATEGORY", ""),
         environment=config["CLIENT_BENCHMARK_ENVIRONMENT"],
-        os_family=config["TARGET_SERVICE_OS_FAMILY"],
-        service=Service(
+        client=Service(
+            type="client",
+            name="elasticsearch-py",
+            version=__versionstr__,
+            os_family=platform.system().lower(),
+            git_branch=config["CLIENT_BRANCH"],
+            git_commit=config["CLIENT_COMMIT"],
+        ),
+        target_service=Service(
             type=config["TARGET_SERVICE_TYPE"],
             name=config["TARGET_SERVICE_NAME"],
             version=config["TARGET_SERVICE_VERSION"],
+            os_family=config["TARGET_SERVICE_OS_FAMILY"],
             git_branch=config.get("TARGET_SERVICE_GIT_BRANCH"),
-            git_commit=config.get("TARGET_SERVICE_GIT_COMMIT")
+            git_commit=config.get("TARGET_SERVICE_GIT_COMMIT"),
         ),
-        data_path=Path(config["DATA_SOURCE"]).absolute()
+        data_path=Path(config["DATA_SOURCE"]).absolute(),
     )
     runner = Runner(runner_config)
 

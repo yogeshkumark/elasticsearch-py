@@ -1,9 +1,16 @@
+# Licensed to Elasticsearch B.V under one or more agreements.
+# Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
+# See the LICENSE file in the project root for more information
+
 from benchmarking.lib import benchmarks, Operation, RunnerConfig
 
 
 def setup_func(_: int, config: RunnerConfig):
     config.target_es.delete(index="test-bench-bulk", ignore=404)
-    config.target_es.create(index="test-bench-bulk", body={"settings": {"number_of_shards": 3, "refresh_interval": "5s"}})
+    config.target_es.create(
+        index="test-bench-bulk",
+        body={"settings": {"number_of_shards": 3, "refresh_interval": "5s"}},
+    )
     config.target_es.cluster.health(wait_for_status="yellow")
 
 

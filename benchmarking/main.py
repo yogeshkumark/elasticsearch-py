@@ -79,7 +79,7 @@ def main():
         if filename.name.endswith(".py") and filename.name != "__init__.py":
             __import__(filename.name[:-3])
 
-    for operation in benchmarks.operations:
+    for operation in benchmarks.actions:
         if "FILTER" in os.environ and operation.action not in os.environ["FILTER"]:
             continue
         runner.run(operation)

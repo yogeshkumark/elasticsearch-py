@@ -39,7 +39,7 @@ class RunnerConfig:
 
 
 @attr.s(slots=True)
-class Operation:
+class Action:
     action: str = attr.ib()
     category: str = attr.ib()
     run_func: Callable[[int, RunnerConfig], None] = attr.ib()
@@ -117,20 +117,20 @@ class Runner:
     def __init__(self, config: RunnerConfig):
         self.config = config
 
-    def run(self, operation: Operation):
-        if operation.setup_func:
-            operation.setup_func(0, self.config)
+    def run(self, action: Action):
+        if action.setup_func:
+            action.setup_func(0, self.config)
 
-        for i in range(operation.num_warmups):
-            operation.run_func(i, self.config)
+        for i in range(action.num_warmups):
+            action.run_func(i, self.config)
 
         stats_to_publish = []
-        for i in range(operation.num_repetitions):
+        for i in range(action.num_repetitions):
             status_code = None
             outcome = "failure"
             start_time = time.time()
             try:
-                operation.run_func(i, self.config)
+                action.run_func(i, self.config)
                 outcome = "success"
                 status_code = 200
             # TransportError gives us a status code, still an error
@@ -144,14 +144,14 @@ class Runner:
                 duration = int((time.time() - start_time) * (10 ** 9))
                 stats_to_publish.append(
                     Stats(
-                        action=operation.action,
+                        action=action.action,
                         start_time=start_time,
                         duration=duration,
                         status_code=status_code,
                         outcome=outcome,
-                        num_warmups=operation.num_warmups,
-                        num_repetitions=operation.num_repetitions,
-                        num_operations=operation.num_operations,
+                        num_warmups=action.num_warmups,
+                        num_repetitions=action.num_repetitions,
+                        num_operations=action.num_operations,
                     )
                 )
 
@@ -174,10 +174,10 @@ class Runner:
 
 class Benchmarks:
     def __init__(self):
-        self.operations = []
+        self.actions = []
 
-    def register(self, operation):
-        self.operations.append(operation)
+    def register(self, action):
+        self.actions.append(action)
 
 
 benchmarks = Benchmarks()

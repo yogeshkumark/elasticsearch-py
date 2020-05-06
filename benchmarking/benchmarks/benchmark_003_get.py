@@ -2,7 +2,7 @@
 # Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 # See the LICENSE file in the project root for more information
 
-from benchmarking.lib import benchmarks, Operation, RunnerConfig
+from benchmarking.lib import benchmarks, Action, RunnerConfig
 
 
 def setup_func(_: int, config: RunnerConfig) -> None:
@@ -17,7 +17,7 @@ def run_func(_: int, config: RunnerConfig) -> None:
 
 
 benchmarks.register(
-    Operation(
+    Action(
         action="get",
         category="core",
         run_func=run_func,

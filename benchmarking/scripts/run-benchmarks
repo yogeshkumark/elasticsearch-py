@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-set -eo pipefail
-python -m pip install -r requirements.txt
-cd benchmarks && python main.py

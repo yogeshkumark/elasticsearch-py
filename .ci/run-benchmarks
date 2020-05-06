@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+set -eo pipefail
+python -m pip install -r benchmarking/requirements.txt
+cd benchmarking && python main.py

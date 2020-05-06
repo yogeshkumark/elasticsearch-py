@@ -8,7 +8,7 @@
 
 import random
 import functools
-from benchmarking.lib import benchmarks, Operation, RunnerConfig
+from benchmarking.lib import benchmarks, Action, RunnerConfig
 
 
 @functools.lru_cache()
@@ -33,7 +33,7 @@ def run_func(n: int, config: RunnerConfig) -> None:
 
 
 benchmarks.register(
-    Operation(
+    Action(
         action="index",
         category="core",
         run_func=run_func,

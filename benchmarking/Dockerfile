@@ -11,7 +11,6 @@ WORKDIR /elasticsearch-py
 COPY . .
 
 RUN python setup.py install && \
-    cd /elasticsearch-py && \
     python -m pip install -r benchmarking/requirements.txt
 
 CMD ["/bin/bash"]

@@ -4,4 +4,8 @@ FROM python:${PYTHON_VERSION}
 COPY dev-requirements.txt /tmp
 RUN python -m pip install -r /tmp/dev-requirements.txt
 
+VOLUME ["/data"]
+
 WORKDIR /code/elasticsearch-py
+
+COPY . .

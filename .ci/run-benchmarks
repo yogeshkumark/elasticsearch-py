@@ -1,5 +1,27 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+#
+# Licensed to Elasticsearch B.V. under one or more agreements.
+# Elasticsearch B.V. licenses this file to you under the Apache 2.0 License.
+# See the LICENSE file in the project root for more information.
 
-set -eo pipefail
-python -m pip install -r benchmarking/requirements.txt
-cd benchmarking && python main.py
+set -euxo pipefail
+
+export WORKSPACE=${WORKSPACE:-$PWD}
+
+COMMIT="$(git rev-parse --short HEAD)"
+
+export CLIENT_IMAGE="eu.gcr.io/elastic-clients/elasticsearch-py:$COMMIT"
+export CLIENT_BRANCH='master'
+export CLIENT_COMMAND='. /environment.sh && cd benchmarks && bundle exec ruby bin/run.rb'
+
+set +x
+echo -e "\033[1mBuilding Docker image for commit [$COMMIT]\033[0m"
+set -x
+docker build --file benchmarks/Dockerfile --tag elastic/elasticsearch-py .
+
+gcloud auth configure-docker --quiet
+gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://eu.gcr.io
+docker tag elastic/elasticsearch-py "$CLIENT_IMAGE"
+docker push "$CLIENT_IMAGE"
+
+exec "$WORKSPACE/.ci/scripts/run-benchmarks.sh"

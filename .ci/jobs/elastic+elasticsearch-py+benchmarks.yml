@@ -2,9 +2,9 @@
 - job:
     project-type: freestyle
     node: linux && immutable
-    name: elastic+clients+benchmarks+elasticsearch-py
-    display-name: 'elastic / benchmarks # elasticsearch-py'
-    description: Running client benchmarks for the Python client
+    name: elastic+elasticsearch-py+benchmarks
+    display-name: 'elastic / elasticsearch-py # benchmarks'
+    description: Client benchmarks for the Python client
     parameters:
       - string: { name: branch_specifier, default: refs/heads/benchmarks }
     triggers:

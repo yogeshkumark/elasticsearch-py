@@ -73,6 +73,7 @@ class Stats:
                 "action": self.action,
                 "dataset": str(config.data_path),
                 "duration": self.duration,
+                "outcome": self.outcome,
             },
             "http": {"response": {"status_code": self.status_code,}},
             "benchmark": {

@@ -2,7 +2,6 @@
 # Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 # See the LICENSE file in the project root for more information
 
-import json
 from benchmarking.lib import benchmarks, Action, RunnerConfig
 
 
@@ -24,7 +23,8 @@ def run_func(_: int, config: RunnerConfig) -> None:
             yield '{"index":{}}'
             yield doc
 
-    config.target_es.bulk(index="test-bench-bulk", body=generator())
+    body = "\n".join(generator())
+    config.target_es.bulk(index="test-bench-bulk", body=body)
 
 
 benchmarks.register(

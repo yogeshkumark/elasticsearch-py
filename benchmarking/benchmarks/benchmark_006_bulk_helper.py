@@ -28,7 +28,9 @@ def run_func(_: int, config: RunnerConfig) -> None:
 
     bulk(
         client=config.target_es,
-        actions=generator()
+        actions=generator(),
+        chunk_size=1000000,
+        max_chunk_bytes=2000000,
     )
 
 

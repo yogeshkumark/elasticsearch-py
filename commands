@@ -14,4 +14,121 @@ for container in $(docker ps -a --format '{{ .Names }}'); do policy=$(docker log
  1011      docker run -d --name=hlog-filebeat --volume="/var/lib/docker/containers:/var/lib/docker/containers" --volume="/var/run/docker.sock:/var/run/docker.sock:ro" --log-opt max-size=10m --log-opt max-file=3 --net=host filebeat:7.6.2 -e -system.hostfs=/hostfs
  1012  docker run -d --name=hlog-filebeat --volume="/var/lib/docker/containers:/var/lib/docker/containers" --volume="/var/run/docker.sock:/var/run/docker.sock:ro" --log-opt max-size=10m --log-opt max-file=3 --net=host filebeat:7.6.2 -e -system.hostfs=/hostfs
  
+ List of emails for the outage :
+
+docker run -it --rm kibana-backup-simple backup [--kibana-url  https://kfdct069.hlcl.com:30001] --all-spaces --backup-file-prefix=backup-
+
+kibana-backup.py backup --kibana-url  https://kfdct069.hlcl.com:30001 --all-spaces --backup-file-prefix=backup-
+
+kibana-backup.py backup [--kibana-url KIBANA_URL] [--user USER] [--password PASSWORD] --all-spaces --backup-file-prefix=backup-
+./kibana-backup.py backup --kibana-url  https://kfdcel01.hlcl.com:30001 --all-spaces --backup-file-prefix=kibana_ --backup-file PROD_
+
+#!/bin/sh
+T0DAY=`date +%d_%m_%y_%H`
+/root/kibana-backup-simple-master/kibana-backup.py backup --kibana-url  https://kfdcel01.hlcl.com:30001 --all-spaces --backup-file-prefix=PROD_"$T0DAY"_ --backup-file kibana_
+
+/root/kibana-backup-simple-master/kibana-backup.py backup --kibana-url  https://kfdct069.hlcl.com:30001 --all-spaces --backup-file-prefix=DEV_"$T0DAY"_ --backup-file kibana_
+
+/root/kibana-backup-simple-master/kibana-backup.py backup --kibana-url  https://kfdct070.hlcl.com:30001--all-spaces --backup-file-prefix=TEST_"$T0DAY"_ --backup-file kibana_
+
+ls -l 
+mv /root/kibana-backup-simple-master/*.ndjson  /root/kibana-backup-simple-master/backup_kibana/
+ls -lrt /root/kibana-backup-simple-master/backup_kibana/
+
+1026  docker build -t kibana-backup-simple .
+ 1027  docker run -it --rm kibana-backup-simple backup --kibana-url  https://kfdcel01.hlcl.com:30001/ --all-spaces --backup-file-prefix=backup-
+ 1028  ls -lrt
+ 1029  cat Dockerfile
+ 1030  python backup [--kibana-url  https://kfdct069.hlcl.com:30001] --all-spaces --backup-file-prefix=backup-
+ 1031  python kibana-backup.py backup [--kibana-url  https://kfdct069.hlcl.com:30001] --all-spaces --backup-file-prefix=backup-
+ 1032  vi kibana-backup.py
+ 1033  python -version
+ 1034  python -v
+
+
+
+[2:53 PM] Shankar, Madhankumar
+    docker run -d --name=hlog-filebeat --volume="/var/lib/docker/containers:/var/lib/docker/containers" --volume="/var/run/docker.sock:/var/run/docker.sock:ro" --log-opt max-size=10m --log-opt max-file=3 --net=host filebeat:7.6.2 -e -system.hostfs=/hostfs
+
+
+
+curator - required proxy for PROD . 
+
+  963  docker ps -a
+  964  docker inspect hlog-filebat
+  965  docker inspect hlog-filebeat
+  966  clear
+  967  docker images
+  968  docker run -d --name=hlog-filebeat -v /var/lib/docker/containers/:/var/lib/docker/containers filebeat:7.6.2
+  969  clear
+  970  docker ps -a
+  971  docker rm -f clear
+  972  clear
+  973  history
+  974  clear
+  975  docker ps -a
+  976  docker rename hlog-filebeat hlog-filebeat_backup
+  977  docker stop hlog-filebeat_backup
+  978  clear
+  979  docker run -d --log-opt max-size=20m --log-opt max-file=3 --name=hlog-filebeat -p 5044:5044 -v /var/lib/docker/containers:/var/lib/docker/containers/ -v /var/run/docker.sock:/var/run/docker.sock filebeat:7.6.2
+  980  docker ps -a
+  981  docker rm -f hlog-filebeat
+  982  clear
+  983  ls
+  984  docker run -d --log-opt max-size=20m --log-opt max-file=3 --name=hlog-filebeat -p 5044:5044 -v /var/lib/docker/containers:/var/lib/docker/containers/ -v /var/run/docker.sock:/var/run/docker.sock filebeat:7.6.2
+  985  docker ps -a
+  986  ls
+  987  cd filebeat_docker/
+  988  ls
+  989  vi dockerfile
+ docker run -dit --name esdb --network elastic -p 9200:9200 -p 9300:9300 --restart always -e "discovery.type=single-node" elasticsearch:7.6.2
+
+
+
+
+[2:00 PM] Shankar, Madhankumar
+    docker run -d --log-opt max-size=20m --log-opt max-file=3 --name=hlog-filebeat -p 5044:5044 -v /var/lib/docker/containers:/var/lib/docker/containers/ -v /var/run/docker.sock:/var/run/docker.sock filebeat:7.6.2
+
+
+
+ 422  docker run -d --name=filebat-7.6.2 -p 5044:5044 -v /var/lib/docker/containers:/var/lib/docker/containers/ -v /var/run/docker.sock:/var/run/docker.sock filebeat:7.6.2
+  507  docker run -d --name=metricbeat --mount type=bind,source=/proc,target=/hostfs/proc,readonly --mount type=bind,source=/sys/fs/cgroup,target=/hostfs/sys/fs/cgroup,readonly --mount type=bind,source=/,target=/hostfs,readonly --net=host metricbeat:7.6.2 -e -system.hostfs=/hostfs
+  510  docker run -d --name=metricbeat --mount type=bind,source=/proc,target=/hostfs/proc,readonly --mount type=bind,source=/sys/fs/cgroup,target=/hostfs/sys/fs/cgroup,readonly --mount type=bind,source=/,target=/hostfs,readonly --net=host metricbeat -e -system.hostfs=/hostfs
+  576  docker run -d --log-opt max-size=20m --log-opt max-file=3 --name=hlog-filebeat -p 5044:5044 -v /var/lib/docker/containers:/var/lib/docker/containers/ -v /var/run/docker.sock:/var/run/docker.sock filebeat:7.6.2
+  715  docker run -dit busybox
+  790  docker run -d --name==hlog-curator curator:latest
+  791  docker run -d --name=hlog-curator curator:latest
+  846  docker run -d --name=hlog-metricbeat --mount type=bind,source=/proc,target=/hostfs/proc,readonly --mount type=bind,source=/sys/fs/cgroup,target=/hostfs/sys/fs/cgroup,readonly --mount type=bind,source=/,target=/hostfs,readonly --log-opt max-size=10m --log-opt max-file=3 --net=host metricbeat:7.6.2 -e -system.hostfs=/hostfs
+  848  docker run -d --name=hlog-metricbeat --mount type=bind,source=/proc,target=/hostfs/proc,readonly --mount type=bind,source=/sys/fs/cgroup,target=/hostfs/sys/fs/cgroup,readonly --mount type=bind,source=/,target=/hostfs,readonly --log-opt max-size=10m --log-opt max-file=3 --net=host metricbeat:latest -e -system.hostfs=/hostfs
+  882  docker run -d --name=hlog-metricbeat --mount type=bind,source=/proc,target=/hostfs/proc,readonly --mount type=bind,source=/sys/fs/cgroup,target=/hostfs/sys/fs/cgroup,readonly --mount type=bind,source=/,target=/hostfs,readonly --log-opt max-size=10m --log-opt max-file=3 --net=host metricbeat:latest -e -system.hostfs=/hostfs
+  977  vi build-and-run.sh
+ 1011      docker run -d --name=hlog-filebeat --volume="/var/lib/docker/containers:/var/lib/docker/containers" --volume="/var/run/docker.sock:/var/run/docker.sock:ro" --log-opt max-size=10m --log-opt max-file=3 --net=host filebeat:7.6.2 -e -system.hostfs=/hostfs
+ 1012  docker run -d --name=hlog-filebeat --volume="/var/lib/docker/containers:/var/lib/docker/containers" --volume="/var/run/docker.sock:/var/run/docker.sock:ro" --log-opt max-size=10m --log-opt max-file=3 --net=host filebeat:7.6.2 -e -system.hostfs=/hostfs
+ 1089  docker run --help
+ 1107  history | grep run
+[docker@kfdct070 var]$
+
+[docker@kfdct070 ~]$ for container in $(docker ps -a --format '{{ .ID }}'); do policy=$(docker inspect $container --format '{{ .HostConfig.RestartPolicy.Name }}'); echo $container $policy; done | grep always
+
+docker logs -f --tail 100
+
+for container in $(docker ps -a --format '{{ .Names }}'); do policy=$(docker logs --tail 100 $container ); echo "\n\\n\n\n\n\n",$container , $policy; $container ;sleep 3; done 
+
+
+for container in $(docker ps -a --format '{{ .ID }}'); do policy=$(docker inspect $container --format '{{ .HostConfig.RestartPolicy.Name }}'); echo $container $policy; done | grep always
+
+github clone :
+github clone :
+
+BALASYK@wvd-itao-s-0 MINGW64 /h/.ssh (master)
+$ git config --global http.sslVerify false
+
+git clone https://gitlab.ad.hl.lan/
+Cloning into 'gitlab.ad.hl.lan'...sh (master)
+$
+
+
+
+
+
  
